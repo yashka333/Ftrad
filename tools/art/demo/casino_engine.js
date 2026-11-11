@@ -40,10 +40,8 @@
   }
   function popupButtons(pb) {
     const x = pb.x + PW - 92, f = pb.f;
-    return [
-      { key: 'work', x, y: pb.y + 28, w: 86, h: 18, ok: !!f.desk && f.stamina >= 1 },
-      { key: 'stop', x, y: pb.y + 50, w: 86, h: 18, ok: !!f.desk },
-    ];
+    const freeDesk = FTCrew.PATHS.some((p) => FTCrew.freeDesks(p) > 0);
+    return [{ key: 'work', x, y: pb.y + 50, w: 86, h: 18, ok: f.stamina >= 1 && freeDesk }];
   }
 
   function tag(ctx, s, cx, y, col, bg) {
@@ -79,11 +77,11 @@
       if (it.key === 'bg') { st.popup = null; return; }
       const pb = popupBox(); if (!pb) return;
       if (it.key === 'p-work') {
-        FTCrew.startWork(pb.f);
+        const err = FTCrew.goWork(pb.f);
+        if (err) { ctx.toast(err, [230, 70, 90]); return; }
         ctx.toast(`${pb.f.name.toUpperCase()} WENT BACK TO ${NAME[pb.f.desk.path]}`, [126, 224, 84]);
         st.popup = null;
       }
-      if (it.key === 'p-stop') FTCrew.stop(pb.f);
     },
 
     under(ctx, t, dt) {
@@ -141,7 +139,7 @@
       ctx.gtext(f.name.toUpperCase(), x0, y0 + 7, '#f2e7d4', 'head', { shadow: '#141216' });
       ctx.gtext(`#${f.id} ${KEYS[f.rarity].toUpperCase()}`, x0, y0 + 19, RCOL[f.rarity], 'body', { shadow: null });
       ctx.gtext('CHILLING', pb.x + PW - 10, y0 + 9, '#ff8ac0', 'body', { align: 'right', shadow: null });
-      ctx.gtext(f.desk ? `DESK: ${NAME[f.desk.path]} ${f.desk.desk + 1}` : 'NO DESK', x0, y0 + 31, f.desk ? '#c8c0d0' : '#8a8096', 'body', { shadow: null });
+      ctx.gtext(`RESTED ${Math.floor(frac * 100)}%`, x0, y0 + 31, '#c8c0d0', 'body', { shadow: null });
       ctx.rect(x0, y0 + 42, x0 + 87, y0 + 47, '#0c0a0e');
       ctx.rect(x0 + 1, y0 + 43, x0 + 1 + Math.round(85 * frac), y0 + 46, '#ff6aa8');
       ctx.gtext(`RESTED IN ${fmtMin(FTCrew.etaMin(f))}`, x0, y0 + 52, '#c8c0d0', 'body', { shadow: null });

@@ -87,15 +87,22 @@
     quiet(cmd('/api/frogs/assign', { frogId: f.id, path, desk }));
     return null;
   }
+  /** Frogs waiting at desks start, then rested frogs without a desk fill the free desks (best first). */
   function allToWork() {
     let n = 0;
     for (const f of frogs) if (f.desk && f.status !== 'working' && f.status !== 'casino' && f.stamina >= 1) { f.status = 'working'; n++; }
+    const idle = frogs.filter((f) => !f.desk && f.status === 'idle' && f.stamina >= 1)
+      .sort((a, b) => b.rarity - a.rarity || b.stats.profit - a.stats.profit);
+    for (const path of PATHS) {
+      let d = freeDesk(path);
+      while (d !== null && idle.length) { const f = idle.shift(); f.desk = { path, desk: d }; f.status = 'working'; n++; d = freeDesk(path); }
+    }
     if (n) quiet(cmd('/api/frogs/work-all'));
     return n;
   }
   function allToCasino() {
     let n = 0;
-    for (const f of frogs) if (f.status !== 'casino' && (f.status === 'working' || f.stamina < f.max)) { f.status = 'casino'; f.rate = 0; n++; }
+    for (const f of frogs) if (f.status !== 'casino' && (f.status === 'working' || f.stamina < f.max)) { f.status = 'casino'; f.desk = null; f.rate = 0; n++; }
     if (n) quiet(cmd('/api/frogs/rest-all'));
     return n;
   }
@@ -104,11 +111,15 @@
     f.status = 'working';
     quiet(cmd('/api/frogs/work', { frogId: f.id }));
   }
-  function rest(f) { f.status = 'casino'; f.rate = 0; quiet(cmd('/api/frogs/rest', { frogId: f.id })); }
+  function rest(f) { f.status = 'casino'; f.desk = null; f.rate = 0; quiet(cmd('/api/frogs/rest', { frogId: f.id })); }
   function stop(f) { f.desk = null; if (f.status !== 'casino') f.status = 'idle'; quiet(cmd('/api/frogs/stop', { frogId: f.id })); }
   function goWork(f, path) {
+    if (!path) path = PATHS.find((p) => freeDesk(p) !== null);
+    if (!path) return 'ALL 15 DESKS ARE TAKEN';
+    if (f.stamina < 1) return 'TOO TIRED: LET IT REST';
     const d = f.desk && f.desk.path === path ? f.desk.desk : freeDesk(path);
     if (d === null) return 'OFFICE IS FULL';
+    f.status = 'working';
     f.desk = { path, desk: d };
     quiet(cmd('/api/frogs/go-work', { frogId: f.id, path, desk: d }));
     return null;
@@ -134,7 +145,7 @@
         const e = f.rate * (min / 60);
         f.earned += e; earned += e;
         f.stamina += f.spm * min;
-        if (f.stamina <= 0) { f.stamina = 0; f.status = 'casino'; f.rate = 0; f.spm = 0; soon(1500); }
+        if (f.stamina <= 0) { f.stamina = 0; f.status = 'casino'; f.desk = null; f.rate = 0; f.spm = 0; soon(1500); }
       } else if (f.status === 'casino' && f.spm > 0) {
         f.stamina = Math.min(f.max, f.stamina + f.spm * min);
         if (f.stamina >= f.max) { f.status = f.desk ? 'ready' : 'idle'; f.spm = 0; soon(1500); }

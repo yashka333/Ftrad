@@ -86,8 +86,6 @@ export const ECONOMY = {
 export const STAMINA = {
   /** Stamina bar = PATIENCE x this. */
   perPatience: 5,
-  /** Shift length for a frog with the median PATIENCE of its rarity. */
-  shiftMinutes: 30,
 } as const;
 
 /** Odds of the extra trade outcomes. */

@@ -35,7 +35,7 @@ describe('api', () => {
     const seat = await post('/api/frogs/auto-seat');
     expect(seat.json().result).toBe(5);
 
-    advance(5 * 60_000);
+    advance(40_000);
     const st = await app.inject({ method: 'GET', url: '/api/state', headers: { cookie } });
     const state = st.json();
     expect(state.player.chest).toBeGreaterThan(0);

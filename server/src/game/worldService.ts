@@ -33,8 +33,8 @@ export class WorldService {
     readonly rand: () => number = secureRandom,
     saved: World | null = null,
   ) {
-    // Worlds saved by older economies (paid casinos, no market) start fresh.
-    this.world = saved && saved.version === 4 ? saved : newWorld(clock());
+    // Worlds saved by older economies (paid casinos, no market, 30 min shifts) start fresh.
+    this.world = saved && saved.version === 5 ? saved : newWorld(clock());
   }
 
   static async open(store: Store, devMode: boolean, clock: () => number = Date.now): Promise<WorldService> {

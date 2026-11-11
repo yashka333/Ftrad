@@ -14,7 +14,7 @@ export function maxStamina(frog: Pick<Frog, 'stats'>): number {
  * so a frog with more PATIENCE (a bigger bar) works longer.
  */
 export function drainPerMin(frog: FrogCore): number {
-  const base = (medianPatience(frog.rarity) * STAMINA.perPatience) / STAMINA.shiftMinutes;
+  const base = (medianPatience(frog.rarity) * STAMINA.perPatience) / RARITIES[frog.rarity]!.shiftMinutes;
   return frog.skills.includes('diamondHands') ? base / TRADES.diamondShift : base;
 }
 
@@ -86,7 +86,9 @@ export function profitPerHour(frog: FrogCore, ctx: TradeContext): number {
   if (has('insider')) outcome += TRADES.insiderChance * (TRADES.insiderMultiplier - 1);
   const rug = has('rugRadar') ? 0 : office.rugRate;
 
-  return frog.stats.profit * office.profit * (1 + bonus) * outcome * (1 - rug);
+  // PROFIT is per full shift of a median frog; spread it over the shift's minutes.
+  const perHour = (frog.stats.profit * 60) / RARITIES[frog.rarity]!.shiftMinutes;
+  return perHour * office.profit * (1 + bonus) * outcome * (1 - rug);
 }
 
 export function bossPrice(sold: number): number | null {

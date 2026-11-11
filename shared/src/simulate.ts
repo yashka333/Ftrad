@@ -1,4 +1,4 @@
-import { ECONOMY, SIM_STEP_MS } from './config.js';
+import { ECONOMY, PATHS, PATH_IDS, SIM_STEP_MS } from './config.js';
 import {
   bossActive,
   drainPerMin,
@@ -8,7 +8,7 @@ import {
   profitPerHour,
   restPerMin,
 } from './formulas.js';
-import type { Player, World } from './types.js';
+import type { DeskSlot, Player, World } from './types.js';
 
 /** Longest offline gap the server will catch up on in one go (7 days). */
 const MAX_CATCH_UP_MS = 7 * 86_400_000;
@@ -26,6 +26,15 @@ export function advanceWorld(world: World, now: number): void {
     t += dt;
   }
   world.lastTickAt = Math.max(world.lastTickAt, now);
+}
+
+function firstFreeDesk(p: Player): DeskSlot | null {
+  for (const path of PATH_IDS) {
+    for (let d = 0; d < PATHS[path].desks; d++) {
+      if (!p.frogs.some((x) => x.desk?.path === path && x.desk.desk === d)) return { path, desk: d };
+    }
+  }
+  return null;
 }
 
 function stepPlayer(p: Player, t0: number, dt: number): number {
@@ -55,17 +64,21 @@ function stepPlayer(p: Player, t0: number, dt: number): number {
       const e = (rate * workMs) / 3_600_000;
       f.earned += e;
       earned += e;
-      // Out of stamina: the frog walks to the casino by itself.
+      // Out of stamina: the frog walks to the casino by itself and frees its desk for the next one.
       if (f.stamina <= 0) {
         f.status = 'casino';
         f.statusSince = t0 + workMs;
+        f.desk = null;
       }
       continue;
     }
 
     if (f.status === 'casino') {
       f.stamina = Math.min(max, f.stamina + (restPerMin(f) * dt) / 60_000);
-      if (boss && f.desk && f.stamina >= max * ECONOMY.boss.returnAt) {
+      const free = boss && f.stamina >= max * ECONOMY.boss.returnAt ? firstFreeDesk(p) : null;
+      if (free) {
+        // The boss sends rested frogs back to any free desk.
+        f.desk = free;
         f.status = 'working';
         f.statusSince = t1;
       } else if (f.stamina >= max) {

@@ -43,7 +43,7 @@
 
   // ------------------------------------------------------------ rules (mirror shared/src/formulas.ts)
   const median = (f) => (R.rarities[f.rarity].patience[0] + R.rarities[f.rarity].patience[1]) / 2;
-  const drainPerMin = (f) => (median(f) * 5 / 30) / (f.skills.includes('diamondHands') ? 1.2 : 1);
+  const drainPerMin = (f) => (median(f) * 5 / R.rarities[f.rarity].shiftMinutes) / (f.skills.includes('diamondHands') ? 1.2 : 1);
   const restPerMin = (f) => (median(f) * 5 / (R.rarities[f.rarity].restHours * 60)) / (f.skills.includes('powerNap') ? 0.85 : 1);
   function ratePerHour(f) {
     if (f.status !== 'working') return 0;
@@ -54,7 +54,7 @@
     let e = (empty / 100) / 2; if (f.skills.includes('stopLoss')) e /= 2;
     let out = 1 + risk / 100 - e;
     if (f.skills.includes('insider')) out += 0.1;
-    return f.stats.profit * (1 + bonus) * out;
+    return (f.stats.profit * 60 / R.rarities[f.rarity].shiftMinutes) * (1 + bonus) * out;
   }
 
   function freeDesk(path) {
@@ -64,6 +64,8 @@
   function freeDesks(path) { let n = 0; for (let d = 0; d < DESKS; d++) if (!frogs.some((f) => f.desk && f.desk.path === path && f.desk.desk === d)) n++; return n; }
 
   function goWork(f, path) {
+    if (!path) path = PATHS.find((p) => freeDesk(p) !== null);
+    if (!path) return 'ALL 15 DESKS ARE TAKEN';
     if (!f.desk || f.desk.path !== path) {
       const d = freeDesk(path);
       if (d === null) return 'OFFICE IS FULL';
@@ -87,16 +89,18 @@
   function allToWork() {
     let n = 0;
     for (const f of frogs) if (f.desk && f.status !== 'working' && f.status !== 'casino' && f.stamina >= 1) { f.status = 'working'; n++; }
+    const idle = frogs.filter((f) => !f.desk && f.status === 'idle' && f.stamina >= 1).sort((a, b) => b.rarity - a.rarity);
+    for (const path of PATHS) { let d = freeDesk(path); while (d !== null && idle.length) { const f = idle.shift(); f.desk = { path, desk: d }; f.status = 'working'; n++; d = freeDesk(path); } }
     return n;
   }
   /** Mirrors shared restAll: every frog that is working or not fully rested goes to the casino. */
   function allToCasino() {
     let n = 0;
-    for (const f of frogs) if (f.status !== 'casino' && (f.status === 'working' || f.stamina < f.max)) { f.status = 'casino'; n++; }
+    for (const f of frogs) if (f.status !== 'casino' && (f.status === 'working' || f.stamina < f.max)) { f.status = 'casino'; f.desk = null; n++; }
     return n;
   }
   function startWork(f) { if (f.desk && f.stamina >= 1) f.status = 'working'; }
-  function rest(f) { f.status = 'casino'; }
+  function rest(f) { f.status = 'casino'; f.desk = null; }
   function stop(f) { f.desk = null; if (f.status !== 'casino') f.status = 'idle'; }
   function autoSeat(list) {
     let n = 0;
@@ -117,7 +121,7 @@
         const e = ratePerHour(f) * (min / 60);
         f.earned += e; earned += e;
         f.stamina -= drainPerMin(f) * min;
-        if (f.stamina <= 0) { f.stamina = 0; f.status = 'casino'; }
+        if (f.stamina <= 0) { f.stamina = 0; f.status = 'casino'; f.desk = null; }
       } else if (f.status === 'casino') {
         f.stamina = Math.min(f.max, f.stamina + restPerMin(f) * min);
         if (f.stamina >= f.max) f.status = f.desk ? 'ready' : 'idle';

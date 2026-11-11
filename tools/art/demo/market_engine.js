@@ -157,8 +157,8 @@
       FTCards.draw(ctx, f, L.card[0], L.card[1], { blink: ((t * 1000 + f.id * 397) % 3700) < 140 });
       ctx.gtext(KEYS[f.rarity].toUpperCase(), ix, iy, RCOL[f.rarity], 'head', { shadow: '#141216' });
       const rows = [
-        ['PROFIT', `${compact(f.stats.profit)} /H`], ['PATIENCE', String(f.stats.patience)], ['RISK', f.stats.risk + '%'],
-        ['WORKS', `${Math.round(f.shiftMinutes || 0)}M`], ['RESTS', `${Math.round((f.restMinutes || 0) / 60)}H`],
+        ['PROFIT', `${compact(f.stats.profit)} /SHIFT`], ['PATIENCE', String(f.stats.patience)], ['RISK', f.stats.risk + '%'],
+        ['WORKS', (f.shiftMinutes || 0) >= 60 ? `${+((f.shiftMinutes) / 60).toFixed(1)}H` : `${+(f.shiftMinutes || 0).toFixed(1)}M`], ['RESTS', `${Math.round((f.restMinutes || 0) / 60)}H`],
       ];
       rows.forEach(([a, b], i) => {
         ctx.gtext(a, ix, iy + 16 + i * 10, '#8a8096', 'body', { shadow: null });

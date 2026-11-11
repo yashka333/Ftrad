@@ -92,7 +92,7 @@ export interface Listing {
 }
 
 export interface World {
-  version: 4;
+  version: 5;
   createdAt: number;
   lastTickAt: number;
   totalPaidOut: number;

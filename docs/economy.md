@@ -11,29 +11,30 @@ Tests in `shared/test/game.test.ts` check the payback targets.
 | Stat | Meaning |
 |---|---|
 | PATIENCE | Shift and rest length. Stamina bar = PATIENCE x 5 |
-| PROFIT | $FROG per hour of work |
+| PROFIT | $FROG earned in one full shift |
 | RISK | % chance of a x2 trade. Half that chance gives an empty trade |
 
-| Rarity | PATIENCE | PROFIT / h | RISK | Skills | Rest |
-|---|---|---|---|---|---|
-| Common | 10–30 | 70–95 | 3–6% | 0–1 | 1 h |
-| Uncommon | 40–60 | 180–240 | 6–9% | 1–2 | 2 h |
-| Rare | 70–90 | 540–710 | 9–12% | 1–2 | 4 h |
-| Epic | 100–120 | 1,550–2,050 | 12–15% | 2–3 | 6 h |
-| Legendary | 130–150 | 2,700–3,550 | 15–18% | 2–3 | 7 h |
-| Mythic | 160–180 | 6,100–8,000 | 18–21% | 3–4 | 8 h |
+| Rarity | PATIENCE | PROFIT / shift | RISK | Skills | Shift | Rest |
+|---|---|---|---|---|---|---|
+| Common | 10–30 | 25–31 | 3–6% | 0–1 | 1.5 min | 1 h |
+| Uncommon | 40–60 | 74–94 | 6–9% | 1–2 | 5 min | 2 h |
+| Rare | 70–90 | 261–333 | 9–12% | 1–2 | 30 min | 4 h |
+| Epic | 100–120 | 801–1,020 | 12–15% | 2–3 | 1 h | 6 h |
+| Legendary | 130–150 | 1,440–1,832 | 15–18% | 2–3 | 1.5 h | 7 h |
+| Mythic | 160–180 | 3,341–4,252 | 18–21% | 3–4 | 2 h | 8 h |
 
-A frog with the median PATIENCE of its rarity works 30 minutes, then rests the hours above.
-More PATIENCE: longer shift and longer rest in the same proportion (Common 10 = 15 min, Common 30 = 45 min).
+Shift and rest are for the median PATIENCE of the rarity. More PATIENCE: longer shift and longer rest in the same proportion
+(Common 10 = 45 s, Common 30 = 2 min 15 s).
 
 ## Work loop
-1. Go work: the frog takes a free desk in an office (5 desks per office, 15 in total).
-2. Out of stamina: it walks to the casino by itself, status IN CASINO.
-3. Rested: status READY. Without a boss it waits for the player to press Go work.
-4. Boss Frog (NFT, 250 total): sends rested frogs back at 80% stamina, day and night.
+Commons work a minute or two and rest an hour, so a big crew of them is played in turns.
+1. ALL TO WORK (or Assign desk): rested frogs take the free desks, best first (5 desks per office, 15 in total).
+2. Out of stamina: the frog walks to the casino by itself and frees its desk for the next frog.
+3. Rested: status IDLE, back in the crew. Press ALL TO WORK again to put the rested frogs on the free desks.
+4. Boss Frog (announcement soon): will send rested frogs back to free desks at 80% stamina.
 
-Real payback with a boss, median frog, no skills (from the tests):
-Common 14.8 days, Uncommon 9.6, Rare 5.6, Epic 2.8, Legendary 1.8, Mythic 0.9.
+Payback when the frog is sent back as soon as it is rested, median frog, no skills (checked by the tests):
+Common 15 days, Uncommon 10, Rare 6, Epic 3, Legendary 2, Mythic 1.
 
 ## Offices
 All three pay the same on average. Pump.fun pays 9% more but 8% of its trades get rugged (Rug Radar saves them).

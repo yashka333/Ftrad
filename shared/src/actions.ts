@@ -10,7 +10,7 @@ import type { Frog, Listing, Player, World } from './types.js';
 
 export function newWorld(now: number): World {
   return {
-    version: 4,
+    version: 5,
     createdAt: now,
     lastTickAt: now,
     totalPaidOut: 0,
@@ -188,12 +188,8 @@ export function goWork(p: Player, frogId: number, path: PathId, now: number, des
   if (!Number.isInteger(d) || d < 0 || d >= PATHS[path].desks) throw new GameError('bad-desk');
   const holder = p.frogs.find((x) => x.desk && x.desk.path === path && x.desk.desk === d);
   if (holder && holder.id !== f.id) throw new GameError('desk-taken');
+  if (f.stamina < 1) throw new GameError('too-tired');
   f.desk = { path, desk: d };
-  if (f.status === 'casino') return; // keeps resting; the boss or the player sends it in later
-  if (f.stamina < 1) {
-    setStatus(f, 'casino', now);
-    return;
-  }
   setStatus(f, 'working', now);
 }
 
@@ -203,11 +199,15 @@ export function assignDesk(p: Player, frogId: number, path: PathId, desk: number
   const f = getFrog(p, frogId);
   const holder = p.frogs.find((x) => x.desk && x.desk.path === path && x.desk.desk === desk);
   if (holder && holder.id !== f.id) throw new GameError('desk-taken');
+  if (f.status === 'casino' && f.stamina < 1) throw new GameError('too-tired');
   f.desk = { path, desk };
-  if (f.status === 'idle') setStatus(f, 'ready', now);
+  if (f.status === 'idle' || f.status === 'casino') setStatus(f, 'ready', now);
 }
 
-/** "All to work": every frog that has a desk and stamina starts trading. Returns how many started. */
+/**
+ * "All to work": frogs waiting at their desks start trading, then the best rested frogs
+ * without a desk take the free desks. Frogs resting in the casino stay there. Returns how many started.
+ */
 export function workAll(p: Player, now: number): number {
   let n = 0;
   for (const f of p.frogs) {
@@ -216,15 +216,16 @@ export function workAll(p: Player, now: number): number {
       n++;
     }
   }
-  return n;
+  return n + autoSeat(p, now);
 }
 
-/** "All to the casino": every frog that is not fully rested goes to rest. Returns how many went. */
+/** "All to the casino": every frog that is not fully rested goes to rest and frees its desk. Returns how many went. */
 export function restAll(p: Player, now: number): number {
   let n = 0;
   for (const f of p.frogs) {
     if (f.status !== 'casino' && (f.status === 'working' || f.stamina < maxStamina(f))) {
       setStatus(f, 'casino', now);
+      f.desk = null;
       n++;
     }
   }
@@ -240,11 +241,12 @@ export function startWork(p: Player, frogId: number, now: number): void {
   setStatus(f, 'working', now);
 }
 
-/** "Rest": send the frog to the casino now. It keeps its desk. */
+/** "Rest": send the frog to the casino now. Its desk is freed for the next frog. */
 export function rest(p: Player, frogId: number, now: number): void {
   const f = getFrog(p, frogId);
   if (f.status === 'casino') throw new GameError('already-resting');
   setStatus(f, 'casino', now);
+  f.desk = null;
 }
 
 /** "Stop": the frog leaves its desk. */

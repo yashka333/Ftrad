@@ -81,7 +81,10 @@
       if (it.key === 'allwork') {
         const n = FTCrew.allToWork();
         if (n) ctx.toast(`${n} ${n === 1 ? 'FROG' : 'FROGS'} WENT TO WORK`, [126, 224, 84]);
-        else ctx.toast(FTCrew.frogs.some((x) => x.desk) ? 'NOBODY AT A DESK IS READY' : 'ASSIGN FROGS TO DESKS FIRST', [230, 70, 90]);
+        else {
+          const desks = FTCrew.frogs.filter((x) => x.desk).length;
+          ctx.toast(desks >= 15 ? 'ALL 15 DESKS ARE BUSY' : 'NO RESTED FROGS: THEY ARE CHILLING IN THE CASINO', [230, 70, 90]);
+        }
         return;
       }
       if (it.key === 'allrest') {

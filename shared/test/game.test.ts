@@ -94,10 +94,11 @@ describe('rarity', () => {
 });
 
 describe('shifts and rest', () => {
-  it('a median frog works 30 minutes and rests its rarity hours', () => {
+  it('a median frog works its rarity shift and rests its rarity hours', () => {
+    const shifts = [1.5, 5, 30, 60, 90, 120];
     for (const r of RARITIES) {
       const f = medianFrog(r.id);
-      expect(shiftMinutes(f)).toBeCloseTo(30, 6);
+      expect(shiftMinutes(f)).toBeCloseTo(shifts[r.id]!, 6);
       expect(restMinutes(f)).toBeCloseTo(r.restHours * 60, 6);
     }
   });
@@ -107,48 +108,58 @@ describe('shifts and rest', () => {
     const high = medianFrog(0, 2);
     low.stats.patience = 10;
     high.stats.patience = 30;
-    expect(shiftMinutes(low)).toBeCloseTo(15, 6);
-    expect(shiftMinutes(high)).toBeCloseTo(45, 6);
+    expect(shiftMinutes(low)).toBeCloseTo(0.75, 6);
+    expect(shiftMinutes(high)).toBeCloseTo(2.25, 6);
     expect(restMinutes(high) / restMinutes(low)).toBeCloseTo(3, 6);
   });
 });
 
-describe('payback with a boss', () => {
+describe('payback', () => {
   const target = [15, 10, 6, 3, 2, 1];
   for (const r of RARITIES) {
-    it(`${r.name} pays a pack back in about ${target[r.id]} days`, () => {
+    it(`${r.name} pays a pack back in about ${target[r.id]} days when sent back as soon as it is rested`, () => {
       const { world, p } = setup();
       const f = medianFrog(r.id);
       p.frogs.push(f);
-      p.bosses = 1;
-      p.bossOn = true;
       p.lastSeenAt = T0;
-      goWork(p, f.id, 'classic', T0);
-      for (let d = 1; d <= 10; d++) advanceWorld(world, T0 + d * DAY);
-      const days = ECONOMY.packPrice / (p.chest / 10);
-      // The boss returns frogs at 80% stamina, so real payback is a bit faster.
-      expect(days).toBeLessThan(target[r.id]! * 1.05);
-      expect(days).toBeGreaterThan(target[r.id]! * 0.75);
+      // the player presses ALL TO WORK every minute, measured over 15 days so long cycles average out
+      const days = 15;
+      for (let m = 0; m < days * 1440; m++) {
+        advanceWorld(world, T0 + m * MIN);
+        workAll(p, T0 + m * MIN);
+      }
+      const payback = ECONOMY.packPrice / (p.chest / days);
+      expect(payback).toBeGreaterThan(target[r.id]! * 0.93);
+      expect(payback).toBeLessThan(target[r.id]! * 1.07);
     });
   }
 });
 
-describe('without a boss', () => {
-  it('a tired frog walks to the casino and waits ready at its desk', () => {
+describe('rotation', () => {
+  it('a tired frog walks to the casino and frees its desk', () => {
     const { world, p } = setup();
     const f = medianFrog(0);
     p.frogs.push(f);
     goWork(p, f.id, 'memecoin', T0);
-    advanceWorld(world, T0 + 31 * MIN);
+    advanceWorld(world, T0 + 2 * MIN);
     expect(f.status).toBe('casino');
+    expect(f.desk).toBeNull();
     const earned = p.chest;
     expect(earned).toBeGreaterThan(0);
-    advanceWorld(world, T0 + 31 * MIN + 61 * MIN);
-    expect(f.status).toBe('ready');
+    advanceWorld(world, T0 + 2 * MIN + 61 * MIN);
+    expect(f.status).toBe('idle');
     advanceWorld(world, T0 + 5 * HOUR);
     expect(p.chest).toBe(earned); // nobody clicked, nothing earned
-    startWork(p, f.id, T0 + 5 * HOUR);
-    expect(f.status).toBe('working');
+  });
+
+  it('ALL TO WORK fills the freed desks with rested frogs', () => {
+    const { world, p } = setup();
+    for (let i = 1; i <= 20; i++) p.frogs.push(medianFrog(0, i));
+    expect(workAll(p, T0)).toBe(15);
+    advanceWorld(world, T0 + 3 * MIN);
+    expect(p.frogs.filter((f) => f.status === 'casino')).toHaveLength(15);
+    expect(workAll(p, T0 + 3 * MIN)).toBe(5);            // the 5 rested ones take desks
+    expect(p.frogs.filter((f) => f.status === 'working')).toHaveLength(5);
   });
 
   it('Rest and Stop buttons', () => {
@@ -158,8 +169,6 @@ describe('without a boss', () => {
     goWork(p, f.id, 'pumpfun', T0);
     rest(p, f.id, T0);
     expect(f.status).toBe('casino');
-    expect(f.desk).not.toBeNull();
-    stop(p, f.id, T0);
     expect(f.desk).toBeNull();
     expect(() => rest(p, f.id, T0)).toThrow(GameError);
   });
@@ -177,14 +186,12 @@ describe('desks and bulk actions', () => {
     const { p } = setup();
     for (let i = 1; i <= 4; i++) p.frogs.push(medianFrog(0, i));
     assignDesk(p, 1, 'memecoin', 0, T0);
-    assignDesk(p, 2, 'memecoin', 3, T0);
     expect(p.frogs[0]!.status).toBe('ready');
-    expect(() => assignDesk(p, 3, 'memecoin', 3, T0)).toThrow(GameError);
-    expect(workAll(p, T0)).toBe(2);              // frogs without a desk stay put
-    expect(p.frogs[2]!.status).toBe('idle');
+    expect(() => assignDesk(p, 2, 'memecoin', 0, T0)).toThrow(GameError);
+    expect(workAll(p, T0)).toBe(4);              // the ready one plus 3 seated on free desks
     p.frogs[0]!.stamina = 10;
-    expect(restAll(p, T0)).toBe(2);              // both working frogs go to rest
-    expect(p.frogs.filter((f) => f.status === 'casino')).toHaveLength(2);
+    expect(restAll(p, T0)).toBe(4);
+    expect(p.frogs.every((f) => f.status === 'casino' && f.desk === null)).toBe(true);
     expect(workAll(p, T0)).toBe(0);              // resting frogs are not pulled out
   });
 });
@@ -215,7 +222,7 @@ describe('skills', () => {
 
   it('Diamond Hands lengthens the shift, Power Nap shortens the rest', () => {
     const f = medianFrog(2);
-    expect(shiftMinutes({ ...f, skills: ['diamondHands'] })).toBeCloseTo(36, 6);
+    expect(shiftMinutes({ ...f, skills: ['diamondHands'] })).toBeCloseTo(36, 6); // Rare: 30 min x 1.2
     expect(restMinutes({ ...f, skills: ['powerNap'] })).toBeCloseTo(4 * 60 * 0.85, 6);
   });
 });
@@ -273,8 +280,8 @@ describe('public state', () => {
     goWork(p, f.id, 'memecoin', T0);
     const s = publicState(world, p, T0);
     const pf = s.player.frogs[0]!;
-    expect(pf.ratePerHour).toBeGreaterThan(3000);
-    expect(pf.shiftMinutes).toBeCloseTo(30, 6);
+    expect(pf.ratePerHour).toBeGreaterThan(1000);
+    expect(pf.shiftMinutes).toBeCloseTo(90, 6);
     expect(pf.restMinutes).toBeCloseTo(7 * 60, 6);
     expect(s.player.ratePerHour).toBeCloseTo(pf.ratePerHour);
   });
