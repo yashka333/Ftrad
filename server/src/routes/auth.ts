@@ -11,13 +11,16 @@ const ADDRESS = '^[1-9A-HJ-NP-Za-km-z]{32,44}$';
 
 /** The exact text Phantom shows the player. The server rebuilds it to check the signature. */
 export function signInMessage(address: string, nonce: string, host: string): string {
+  // Plain text on purpose: a first line like "<x> wants you to sign in with your Solana account:"
+  // makes Phantom parse it as Sign-In With Solana and reject anything not in that exact format.
   return [
-    'Frogotraderz wants you to sign in with your Solana account:',
-    address,
+    'Sign in to Frogotraderz',
     '',
-    'This only proves you own the wallet. It costs nothing and sends no transaction.',
+    `Wallet: ${address}`,
     '',
-    `Domain: ${host}`,
+    'This only proves you own this wallet. It costs nothing and sends no transaction.',
+    '',
+    `Site: ${host}`,
     `Nonce: ${nonce}`,
   ].join('\n');
 }
