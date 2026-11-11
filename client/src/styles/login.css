@@ -1,0 +1,29 @@
+.login {
+  height: 100%;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  align-items: center; gap: 32px;
+  padding: 24px clamp(16px, 4vw, 56px);
+  background: radial-gradient(ellipse at 30% 40%, #1c1730, var(--bg) 70%);
+  overflow: auto;
+}
+.hub { position: relative; width: min(100%, 750px, 80vh); aspect-ratio: 1; justify-self: center; border: var(--px) solid var(--frame); box-shadow: 0 0 0 var(--px) var(--line); }
+.hub img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hub-layer { transition: none; }
+.login-card {
+  display: grid; gap: 14px; padding: 24px;
+  background: var(--panel); border: var(--px) solid var(--frame); box-shadow: 0 0 0 var(--px) var(--line);
+}
+.tagline { margin: 0; font-size: 24px; text-wrap: balance; }
+.login-form { display: grid; gap: 10px; }
+.label { font-family: var(--display); font-size: 11px; color: var(--muted); text-transform: uppercase; }
+.input {
+  font: inherit; font-size: 24px; padding: 8px 12px;
+  color: var(--ink); background: var(--bg2); border: var(--px) solid var(--frame);
+}
+.input:focus { outline: 2px solid var(--green); }
+.form-error { margin: 0; min-height: 1.2em; color: var(--red); }
+
+@media (max-width: 860px) {
+  .login { grid-template-columns: 1fr; align-content: start; }
+  .hub { width: min(100%, 420px); }
+}

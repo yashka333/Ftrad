@@ -1,0 +1,73 @@
+.shell {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.stage { position: relative; min-height: 0; overflow: hidden; background: #0b0910; }
+.stage canvas { display: block; }
+
+.hud {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 8px 16px;
+  background: var(--bg2);
+  border-bottom: var(--px) solid var(--frame);
+  flex-wrap: wrap;
+}
+.hud-left, .hud-mid, .hud-right { display: flex; align-items: center; gap: 10px; }
+.hud-mid { flex-wrap: wrap; justify-content: center; }
+.logo { height: 22px; }
+.logo.big { height: 44px; }
+.dot-live { width: 8px; height: 8px; background: var(--muted); }
+.dot-live.on { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.hud-chip {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 12px 4px 8px;
+  background: var(--panel);
+  border: var(--px) solid var(--frame);
+  min-height: 42px;
+}
+.hud-chip .px-icon { width: 24px; height: 24px; }
+.hud-col { display: grid; line-height: 1.05; }
+.hud-chip .label { font-family: var(--display); font-size: 9px; color: var(--muted); text-transform: uppercase; }
+.hud-chip .num { font-size: 24px; font-variant-numeric: tabular-nums; }
+.hud-chest { cursor: pointer; border-color: #4a3410; background: #241a0c; }
+.hud-chest:hover { background: #30220e; }
+.hud-chest .num { color: var(--gold); min-width: 9ch; text-align: left; }
+.hud-chest .rate { font-family: var(--display); font-size: 10px; color: var(--green); }
+.player { font-family: var(--display); font-size: 11px; color: var(--muted); }
+
+.dock {
+  display: flex; justify-content: center; gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg2);
+  border-top: var(--px) solid var(--frame);
+}
+.dock-btn {
+  position: relative;
+  display: grid; justify-items: center; gap: 2px;
+  min-width: 76px; padding: 6px 10px;
+  background: var(--panel); border: var(--px) solid var(--frame);
+  cursor: pointer;
+  font-family: var(--display); font-size: 10px; text-transform: uppercase;
+}
+.dock-btn .px-icon { width: 32px; height: 32px; }
+.dock-btn:hover { background: var(--panel2); transform: translateY(-2px); }
+.badge {
+  position: absolute; top: -8px; right: -8px;
+  min-width: 22px; padding: 1px 5px;
+  background: var(--green-d); border: 2px solid var(--frame);
+  font-size: 10px;
+}
+
+@media (max-width: 720px) {
+  .hud { padding: 6px 10px; gap: 6px; }
+  .hud-pool { display: none; }
+  .logo { height: 16px; }
+  .hud-right .player { display: none; }
+  .hud-chip { min-height: 36px; padding: 2px 8px 2px 6px; }
+  .hud-chip .num { font-size: 19px; }
+  .dock-btn { min-width: 0; flex: 1; padding: 6px 4px; }
+  .dock-btn .px-icon { width: 24px; height: 24px; }
+}

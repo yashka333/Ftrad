@@ -1,0 +1,90 @@
+/* Frog Traders design tokens: night-time trading floor, neon accents, pixel frames. */
+:root {
+  --bg: #0f0d16;
+  --bg2: #16121f;
+  --panel: #1d1729;
+  --panel2: #261e36;
+  --line: #3b3054;
+  --frame: #07060b;
+  --ink: #f4ead2;
+  --muted: #a99fbd;
+  --green: #3ddc84;
+  --green-d: #1f8a4f;
+  --gold: #f2c94c;
+  --red: #ff4d5e;
+  --orange: #e8662f;
+  --purple: #9a5cf0;
+  --teal: #3cc6a8;
+  --display: 'Silkscreen', 'Courier New', monospace;
+  --body: 'Jersey 10', 'Arial Narrow', system-ui, sans-serif;
+  --px: 3px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 20px;
+  line-height: 1.2;
+  font-synthesis: none;
+  -webkit-font-smoothing: none;
+  overflow: hidden;
+}
+#app { height: 100%; }
+img, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
+button { font: inherit; color: inherit; }
+b, strong { font-weight: 400; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.px-icon { width: 16px; height: 16px; flex: none; }
+
+/* Buttons: chunky pixel slabs that press down */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px;
+  background: var(--panel2);
+  border: var(--px) solid var(--frame);
+  box-shadow: inset 0 calc(var(--px) * -1) 0 rgba(0, 0, 0, .35), inset 0 var(--px) 0 rgba(255, 255, 255, .08);
+  cursor: pointer;
+  font-family: var(--display);
+  font-size: 12px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.btn:hover:not(:disabled) { background: var(--line); }
+.btn:active:not(:disabled) { transform: translateY(2px); box-shadow: inset 0 var(--px) 0 rgba(0, 0, 0, .35); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn-main { background: var(--green-d); color: #fff; }
+.btn-main:hover:not(:disabled) { background: #26a05d; }
+.btn-ghost { background: transparent; }
+.btn-small { padding: 5px 10px; font-size: 10px; }
+.btn-big { padding: 12px 20px; font-size: 14px; }
+
+.loading, .fatal {
+  height: 100%; display: grid; place-content: center; gap: 16px; text-align: center;
+}
+.loading-logo { font-family: var(--display); font-size: 28px; color: var(--green); margin: 0; }
+.loading-bar { width: 240px; height: 14px; border: var(--px) solid var(--frame); background: var(--panel); }
+.loading-bar i { display: block; height: 100%; width: 0; background: var(--green); transition: width .15s; }
+.fatal { color: var(--muted); padding: 24px; }
+
+#toast-root {
+  position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%);
+  display: grid; gap: 8px; z-index: 60; pointer-events: none; width: min(92vw, 420px);
+}
+.toast {
+  padding: 10px 14px; background: var(--panel2); border: var(--px) solid var(--frame);
+  font-size: 19px; opacity: 0; transform: translateY(8px); transition: opacity .2s, transform .2s;
+}
+.toast.show { opacity: 1; transform: none; }
+.toast-error { border-left: 6px solid var(--red); }
+.toast-success { border-left: 6px solid var(--green); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

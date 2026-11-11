@@ -1,0 +1,25 @@
+{
+  "name": "frogotraderz",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Frogotraderz: AFK pixel game on Solana where frogs trade for you",
+  "type": "module",
+  "workspaces": [
+    "shared",
+    "server"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w server",
+    "start": "npm run start -w server",
+    "test": "npm run test -w shared && npm run test -w server",
+    "typecheck": "tsc -p shared && tsc -p server",
+    "client": "python3 tools/art/demo/build_home_demo.py server/public/index.html --live"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

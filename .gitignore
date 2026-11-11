@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+server/data/*.json
+!server/data/.gitkeep
+*.log
+.DS_Store
+tools/art/__pycache__/
+tools/art/trailer/build/
+tools/art/demo/rules.json

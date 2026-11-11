@@ -1,0 +1,12 @@
+services:
+  game:
+    build: .
+    ports:
+      - "8787:8787"
+    environment:
+      PORT: 8787
+      SESSION_SECRET: ${SESSION_SECRET:-change-me-to-a-long-random-string}
+      DEV_MODE: ${DEV_MODE:-true}
+    volumes:
+      - ./server/data:/app/server/data
+    restart: unless-stopped

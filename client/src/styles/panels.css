@@ -1,0 +1,111 @@
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 50;
+  display: grid; place-items: center;
+  padding: 16px;
+  background: rgba(7, 6, 11, .66);
+  animation: fade .15s ease-out;
+}
+.modal {
+  width: min(560px, 100%);
+  max-height: min(86vh, 900px);
+  display: grid; grid-template-rows: auto 1fr;
+  background: var(--panel);
+  border: var(--px) solid var(--frame);
+  box-shadow: 0 0 0 var(--px) var(--line), 0 18px 0 -6px rgba(0, 0, 0, .5);
+  animation: pop .18s ease-out;
+}
+.modal-wide { width: min(980px, 100%); }
+.modal-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px 10px 14px;
+  background: var(--panel2);
+  border-bottom: var(--px) solid var(--frame);
+}
+.modal-icon { width: 24px; height: 24px; }
+.modal-title { margin: 0; flex: 1; font-family: var(--display); font-size: 16px; font-weight: 400; text-wrap: balance; }
+.modal-close {
+  width: 32px; height: 32px; border: var(--px) solid var(--frame); background: #3a1620;
+  font-family: var(--display); cursor: pointer;
+}
+.modal-close:hover { background: #5a1c2c; }
+.modal-body { padding: 16px; overflow: auto; min-height: 0; }
+.modal-body h3 { font-family: var(--display); font-size: 12px; font-weight: 400; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin: 18px 0 8px; }
+.lead { margin: 0 0 14px; max-width: 65ch; }
+.note { margin: 0 0 14px; padding: 8px 12px; background: var(--bg2); border-left: 4px solid var(--green); }
+.note.warn { border-left-color: var(--gold); }
+.fine { color: var(--muted); font-size: 17px; }
+.empty { color: var(--muted); padding: 24px 0; text-align: center; }
+.hint { color: var(--muted); font-size: 18px; }
+.center { justify-content: center; }
+
+.toolbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.tab {
+  padding: 6px 10px; background: var(--bg2); border: var(--px) solid var(--frame); cursor: pointer;
+  font-family: var(--display); font-size: 10px; text-transform: uppercase;
+}
+.tab.active { background: var(--line); color: var(--gold); }
+
+.actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.path-buttons { display: grid; gap: 6px; }
+.btn-path { justify-content: flex-start; }
+.btn-path.active { outline: 2px solid var(--gold); }
+.btn-note { margin-left: auto; color: var(--muted); font-size: 10px; }
+.dot { width: 10px; height: 10px; display: inline-block; }
+
+.facts { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; }
+.facts dt { color: var(--muted); font-size: 18px; }
+.facts dd { margin: 0; font-variant-numeric: tabular-nums; }
+.facts.small dt, .facts.small dd { font-size: 17px; }
+.bullets { margin: 8px 0 14px; padding-left: 18px; }
+.bullets li { margin: 4px 0; }
+
+.detail { display: grid; grid-template-columns: 220px 1fr; gap: 20px; align-items: start; }
+.detail .card { width: 100%; }
+.detail-status { margin: 0 0 12px; font-family: var(--display); font-size: 12px; color: var(--gold); }
+.detail-side .skills .skill { display: flex; gap: 8px; align-items: flex-start; padding: 4px 0; }
+.detail-side .skills { display: grid; gap: 2px; }
+.detail-side .skills b { color: var(--gold); }
+
+.packs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px; }
+.pack {
+  display: grid; justify-items: center; gap: 6px;
+  padding: 12px 8px; background: var(--bg2); border: var(--px) solid var(--frame); cursor: pointer;
+}
+.pack:hover:not(:disabled) { background: var(--panel2); transform: translateY(-3px); }
+.pack:disabled { opacity: .45; cursor: not-allowed; }
+.pack-art { width: 72px; height: 96px; }
+.pack strong { font-family: var(--display); font-size: 12px; }
+.price { display: flex; align-items: center; gap: 6px; color: var(--gold); font-variant-numeric: tabular-nums; }
+.wallet-line { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+.odds { width: 100%; border-collapse: collapse; font-size: 18px; }
+.odds th { text-align: left; font-family: var(--display); font-size: 10px; color: var(--muted); font-weight: 400; padding: 6px 8px; border-bottom: 2px solid var(--line); }
+.odds td { padding: 6px 8px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+
+.tier-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.tier { display: grid; gap: 10px; padding: 12px; background: var(--bg2); border: var(--px) solid var(--frame); }
+.tier header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.tier strong { font-family: var(--display); font-size: 12px; font-weight: 400; }
+.tier-n { color: var(--muted); font-size: 16px; }
+.tier-active { border-color: var(--green-d); box-shadow: 0 0 0 2px var(--green-d); }
+.chip { display: inline-block; padding: 6px 10px; font-family: var(--display); font-size: 10px; text-transform: uppercase; text-align: center; }
+.chip-good { background: #12331f; color: var(--green); border: 2px solid var(--green-d); }
+
+.switch-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 12px; background: var(--bg2); border: var(--px) solid var(--frame); margin-bottom: 10px; }
+
+.chest-hero { display: flex; gap: 16px; align-items: center; margin-bottom: 16px; }
+.chest-art { width: 64px; height: 64px; }
+.chest-hero .label { display: block; font-family: var(--display); font-size: 10px; color: var(--muted); }
+.chest-hero .big { display: block; font-size: 40px; color: var(--gold); font-variant-numeric: tabular-nums; }
+.chest-hero .sub { color: var(--green); font-size: 18px; }
+.dev { display: flex; gap: 12px; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 2px dashed var(--line); }
+.dev > span { font-family: var(--display); font-size: 10px; color: var(--gold); }
+
+@keyframes fade { from { opacity: 0; } }
+@keyframes pop { from { transform: scale(.96); opacity: 0; } }
+
+@media (max-width: 760px) {
+  .detail { grid-template-columns: 1fr; }
+  .packs { grid-template-columns: repeat(2, 1fr); }
+  .tier-grid { grid-template-columns: 1fr 1fr; }
+}

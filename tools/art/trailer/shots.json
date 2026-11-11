@@ -1,0 +1,187 @@
+[
+ {
+  "name": "meme_work",
+  "room": "memecoin",
+  "seed": 11,
+  "seconds": 7.0,
+  "preroll": 2,
+  "frogs": [
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "events": [
+   {
+    "t": 0.7,
+    "setFrog": [
+     2,
+     {
+      "rarity": "mythic",
+      "state": "work",
+      "name": "mythic"
+     }
+    ]
+   },
+   {
+    "t": 1.02,
+    "setFrog": [
+     0,
+     {
+      "rarity": "common",
+      "state": "work",
+      "name": "common"
+     }
+    ]
+   },
+   {
+    "t": 1.3399999999999999,
+    "setFrog": [
+     4,
+     {
+      "rarity": "legendary",
+      "state": "work",
+      "name": "legendary"
+     }
+    ]
+   },
+   {
+    "t": 1.66,
+    "setFrog": [
+     1,
+     {
+      "rarity": "rare",
+      "state": "work",
+      "name": "rare"
+     }
+    ]
+   },
+   {
+    "t": 1.98,
+    "setFrog": [
+     3,
+     {
+      "rarity": "epic",
+      "state": "work",
+      "name": "epic"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "name": "pump",
+  "room": "pumpfun",
+  "seed": 12,
+  "seconds": 3.2,
+  "preroll": 3,
+  "frogs": [
+   {
+    "rarity": "epic",
+    "state": "work",
+    "name": "epic"
+   },
+   {
+    "rarity": "uncommon",
+    "state": "work",
+    "name": "uncommon"
+   },
+   {
+    "rarity": "legendary",
+    "state": "work",
+    "name": "legendary"
+   },
+   {
+    "rarity": "rare",
+    "state": "work",
+    "name": "rare"
+   },
+   {
+    "rarity": "common",
+    "state": "work",
+    "name": "common"
+   }
+  ]
+ },
+ {
+  "name": "classic",
+  "room": "classic",
+  "seed": 13,
+  "seconds": 3.2,
+  "preroll": 3,
+  "frogs": [
+   {
+    "rarity": "legendary",
+    "state": "work",
+    "name": "legendary"
+   },
+   {
+    "rarity": "rare",
+    "state": "work",
+    "name": "rare"
+   },
+   {
+    "rarity": "epic",
+    "state": "work",
+    "name": "epic"
+   },
+   {
+    "rarity": "uncommon",
+    "state": "work",
+    "name": "uncommon"
+   },
+   {
+    "rarity": "mythic",
+    "state": "work",
+    "name": "mythic"
+   }
+  ]
+ },
+ {
+  "name": "boss_office",
+  "room": "memecoin",
+  "seed": 14,
+  "seconds": 6.5,
+  "preroll": 3,
+  "boss": "green@0.7",
+  "bossSink": 3,
+  "frogs": [
+   {
+    "rarity": "common",
+    "state": "work",
+    "name": "common"
+   },
+   {
+    "rarity": "rare",
+    "state": "work",
+    "name": "rare"
+   },
+   {
+    "rarity": "mythic",
+    "state": "work",
+    "name": "mythic"
+   },
+   {
+    "rarity": "epic",
+    "state": "work",
+    "name": "epic"
+   },
+   {
+    "rarity": "legendary",
+    "state": "work",
+    "name": "legendary"
+   }
+  ],
+  "events": [
+   {
+    "t": 0.0,
+    "setBoss": false
+   },
+   {
+    "t": 1.0,
+    "setBoss": true
+   }
+  ]
+ }
+]
