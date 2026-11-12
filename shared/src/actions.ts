@@ -201,12 +201,16 @@ export function assignDesk(p: Player, frogId: number, path: PathId, desk: number
   if (holder && holder.id !== f.id) throw new GameError('desk-taken');
   if (f.status === 'casino' && f.stamina < 1) throw new GameError('too-tired');
   f.desk = { path, desk };
+  f.home = { path, desk };
   if (f.status === 'idle' || f.status === 'casino') setStatus(f, 'ready', now);
 }
 
+const holderOf = (p: Player, path: PathId, desk: number) => p.frogs.find((x) => x.desk?.path === path && x.desk.desk === desk);
+
 /**
- * "All to work": frogs waiting at their desks start trading, then the best rested frogs
- * without a desk take the free desks. Frogs resting in the casino stay there. Returns how many started.
+ * "All to work", one press: frogs waiting at their desks start trading, rested frogs go back to the
+ * desk they were put at by hand if it is free, and the other rested frogs fill whatever desks are left.
+ * Frogs resting in the casino stay there. Returns how many started.
  */
 export function workAll(p: Player, now: number): number {
   let n = 0;
@@ -216,14 +220,32 @@ export function workAll(p: Player, now: number): number {
       n++;
     }
   }
-  return n + autoSeat(p, now);
+  const rested = p.frogs.filter((f) => !f.desk && f.status === 'idle' && f.stamina >= 1);
+  for (const f of rested) {
+    if (f.home && !holderOf(p, f.home.path, f.home.desk)) {
+      f.desk = { ...f.home };
+      setStatus(f, 'working', now);
+      n++;
+    }
+  }
+  const left = rested.filter((f) => !f.desk);
+  for (const path of PATH_IDS) {
+    for (let d = 0; d < PATHS[path].desks && left.length; d++) {
+      if (holderOf(p, path, d)) continue;
+      const f = left.shift()!;
+      f.desk = { path, desk: d };
+      setStatus(f, 'working', now);
+      n++;
+    }
+  }
+  return n;
 }
 
-/** "All to the casino": every frog that is not fully rested goes to rest and frees its desk. Returns how many went. */
+/** "All to the casino": frogs that are not working and not fully rested go to rest. Working frogs keep working. */
 export function restAll(p: Player, now: number): number {
   let n = 0;
   for (const f of p.frogs) {
-    if (f.status !== 'casino' && (f.status === 'working' || f.stamina < maxStamina(f))) {
+    if (f.status !== 'casino' && f.status !== 'working' && f.stamina < maxStamina(f)) {
       setStatus(f, 'casino', now);
       f.desk = null;
       n++;
@@ -253,6 +275,7 @@ export function rest(p: Player, frogId: number, now: number): void {
 export function stop(p: Player, frogId: number, now: number): void {
   const f = getFrog(p, frogId);
   f.desk = null;
+  f.home = null;
   if (f.status !== 'casino') setStatus(f, 'idle', now);
 }
 

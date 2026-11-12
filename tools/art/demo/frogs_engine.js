@@ -89,7 +89,7 @@
       }
       if (it.key === 'allrest') {
         const n = FTCrew.allToCasino();
-        ctx.toast(n ? `${n} ${n === 1 ? 'FROG' : 'FROGS'} WENT TO THE CASINO` : 'EVERYONE IS RESTED OR RESTING', n ? [255, 106, 168] : [230, 70, 90]);
+        ctx.toast(n ? `${n} ${n === 1 ? 'FROG' : 'FROGS'} WENT TO THE CASINO` : 'WORKING FROGS STAY, TIRED ONES ARE ALREADY THERE', n ? [255, 106, 168] : [230, 70, 90]);
         return;
       }
       if (it.key === 'tab') { st.tab = it.tab; st.scroll = 0; return; }
@@ -181,7 +181,8 @@
       const ix = L.info.x, rw = L.rows, s = STATUS[f.status];
       ctx.gtext(s.label, ix, rw.status, s.col, 'head', { shadow: '#141216' });
       if (f.status === 'working') ctx.gtext(`+${compact(FTCrew.ratePerHour(f))} $FROG/H`, ix, rw.rate, '#ffe282', 'body', { shadow: null });
-      ctx.gtext(f.desk ? `${OFFICE[f.desk.path]} DESK ${f.desk.desk + 1}` : 'NO DESK', ix, rw.desk, f.desk ? '#f2e7d4' : '#8a8096', 'body', { shadow: null });
+      const dk = f.desk ? `${OFFICE[f.desk.path]} DESK ${f.desk.desk + 1}` : f.home ? `HOME: ${OFFICE[f.home.path]} ${f.home.desk + 1}` : 'NO DESK';
+      ctx.gtext(dk, ix, rw.desk, f.desk ? '#f2e7d4' : f.home ? '#ffd66e' : '#8a8096', 'body', { shadow: null });
       const [bx0, by0, bx1, by1] = rw.bar, frac = f.stamina / f.max;
       ctx.rect(bx0, by0, bx0 + Math.round((bx1 - bx0) * frac), by1, s.col);
       const eta = FTCrew.etaMin(f);

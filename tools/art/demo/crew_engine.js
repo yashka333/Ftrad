@@ -81,27 +81,38 @@
   function assignDesk(f, path, desk) {
     const h = holder(path, desk);
     if (h && h !== f) return 'DESK TAKEN';
-    f.desk = { path, desk };
+    f.desk = { path, desk }; f.home = { path, desk };
     if (f.status === 'idle') f.status = 'ready';
     return null;
   }
   /** Mirrors shared workAll: every frog with a desk and stamina starts trading. */
+  /** One press: waiting frogs start, rested frogs go to the desk they were put at by hand, the rest fill free desks. */
   function allToWork() {
     let n = 0;
     for (const f of frogs) if (f.desk && f.status !== 'working' && f.status !== 'casino' && f.stamina >= 1) { f.status = 'working'; n++; }
-    const idle = frogs.filter((f) => !f.desk && f.status === 'idle' && f.stamina >= 1).sort((a, b) => b.rarity - a.rarity);
-    for (const path of PATHS) { let d = freeDesk(path); while (d !== null && idle.length) { const f = idle.shift(); f.desk = { path, desk: d }; f.status = 'working'; n++; d = freeDesk(path); } }
+    const rested = frogs.filter((f) => !f.desk && f.status === 'idle' && f.stamina >= 1);
+    for (const f of rested) if (f.home && !holder(f.home.path, f.home.desk)) { f.desk = { ...f.home }; f.status = 'working'; n++; }
+    const left = rested.filter((f) => !f.desk);
+    for (const path of PATHS) for (let d = 0; d < DESKS && left.length; d++) {
+      if (holder(path, d)) continue;
+      const f = left.shift(); f.desk = { path, desk: d }; f.status = 'working'; n++;
+    }
+
     return n;
   }
+
   /** Mirrors shared restAll: every frog that is working or not fully rested goes to the casino. */
+  /** Frogs that stopped working and are not rested go to rest. Working frogs keep working. */
   function allToCasino() {
     let n = 0;
-    for (const f of frogs) if (f.status !== 'casino' && (f.status === 'working' || f.stamina < f.max)) { f.status = 'casino'; f.desk = null; n++; }
+    for (const f of frogs) if (f.status !== 'casino' && f.status !== 'working' && f.stamina < f.max) { f.status = 'casino'; f.desk = null; f.rate = 0; n++; }
+
     return n;
   }
+
   function startWork(f) { if (f.desk && f.stamina >= 1) f.status = 'working'; }
   function rest(f) { f.status = 'casino'; f.desk = null; }
-  function stop(f) { f.desk = null; if (f.status !== 'casino') f.status = 'idle'; }
+  function stop(f) { f.desk = null; f.home = null; if (f.status !== 'casino') f.status = 'idle'; }
   function autoSeat(list) {
     let n = 0;
     for (const f of list) {

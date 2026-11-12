@@ -189,10 +189,25 @@ describe('desks and bulk actions', () => {
     expect(p.frogs[0]!.status).toBe('ready');
     expect(() => assignDesk(p, 2, 'memecoin', 0, T0)).toThrow(GameError);
     expect(workAll(p, T0)).toBe(4);              // the ready one plus 3 seated on free desks
-    p.frogs[0]!.stamina = 10;
-    expect(restAll(p, T0)).toBe(4);
-    expect(p.frogs.every((f) => f.status === 'casino' && f.desk === null)).toBe(true);
-    expect(workAll(p, T0)).toBe(0);              // resting frogs are not pulled out
+    // ALL TO CASINO only takes frogs that stopped working and are not rested
+    stop(p, 2, T0);
+    p.frogs[1]!.stamina = 10;
+    expect(restAll(p, T0)).toBe(1);
+    expect(p.frogs.filter((f) => f.status === 'working')).toHaveLength(3);
+    expect(p.frogs[1]!.status).toBe('casino');
+  });
+
+  it('a frog put at a desk by hand goes back to that desk first', () => {
+    const { world, p } = setup();
+    for (let i = 1; i <= 16; i++) p.frogs.push(medianFrog(0, i));
+    assignDesk(p, 16, 'classic', 4, T0);         // last desk in the last office
+    workAll(p, T0);
+    expect(p.frogs[15]!.desk).toEqual({ path: 'classic', desk: 4 });
+    advanceWorld(world, T0 + 3 * MIN);           // everyone tired, desks freed
+    advanceWorld(world, T0 + 3 * MIN + 2 * HOUR);
+    expect(p.frogs.every((f) => f.status === 'idle')).toBe(true);
+    workAll(p, T0 + 3 * MIN + 2 * HOUR);
+    expect(p.frogs[15]!.desk).toEqual({ path: 'classic', desk: 4 });
   });
 });
 

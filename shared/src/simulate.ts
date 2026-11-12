@@ -75,7 +75,8 @@ function stepPlayer(p: Player, t0: number, dt: number): number {
 
     if (f.status === 'casino') {
       f.stamina = Math.min(max, f.stamina + (restPerMin(f) * dt) / 60_000);
-      const free = boss && f.stamina >= max * ECONOMY.boss.returnAt ? firstFreeDesk(p) : null;
+      const home = f.home && !p.frogs.some((x) => x.desk?.path === f.home!.path && x.desk.desk === f.home!.desk) ? { ...f.home } : null;
+      const free = boss && f.stamina >= max * ECONOMY.boss.returnAt ? home ?? firstFreeDesk(p) : null;
       if (free) {
         // The boss sends rested frogs back to any free desk.
         f.desk = free;

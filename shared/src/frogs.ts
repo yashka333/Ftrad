@@ -30,6 +30,7 @@ export function createFrog(id: number, now: number, rand: () => number, rarity =
     status: 'idle',
     statusSince: now,
     desk: null,
+    home: null,
     earned: 0,
     bornAt: now,
   };

@@ -116,7 +116,7 @@
       }
       if (it.key === 'allrest') {
         const n = FTCrew.allToCasino();
-        ctx.toast(n ? `${n} ${n === 1 ? 'FROG' : 'FROGS'} WENT TO THE CASINO` : 'EVERYONE IS RESTED OR RESTING', n ? [255, 106, 168] : [230, 70, 90]);
+        ctx.toast(n ? `${n} ${n === 1 ? 'FROG' : 'FROGS'} WENT TO THE CASINO` : 'WORKING FROGS STAY, TIRED ONES ARE ALREADY THERE', n ? [255, 106, 168] : [230, 70, 90]);
         return;
       }
       if (it.key === 'boss') { ctx.go('boss'); return; }

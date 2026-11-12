@@ -40,7 +40,7 @@
     const f = into || {};
     Object.assign(f, {
       id: pf.id, uid: 'f' + pf.id, name: pf.name, rarity: pf.rarity, skin: pf.skin, stats: pf.stats, skills: pf.skills,
-      status: pf.status, stamina: pf.stamina, desk: pf.desk, earned: pf.earned,
+      status: pf.status, stamina: pf.stamina, desk: pf.desk, home: pf.home || null, earned: pf.earned,
       max: pf.maxStamina, rate: pf.ratePerHour || 0, spm: pf.staminaPerMin || 0,
       shiftMinutes: pf.shiftMinutes, restMinutes: pf.restMinutes,
     });
@@ -82,37 +82,41 @@
   function assignDesk(f, path, desk) {
     const h = holder(path, desk);
     if (h && h !== f) return 'DESK TAKEN';
-    f.desk = { path, desk };
-    if (f.status === 'idle') f.status = 'ready';
+    f.desk = { path, desk }; f.home = { path, desk };
+    if (f.status === 'idle' || f.status === 'casino') f.status = 'ready';
     quiet(cmd('/api/frogs/assign', { frogId: f.id, path, desk }));
     return null;
   }
-  /** Frogs waiting at desks start, then rested frogs without a desk fill the free desks (best first). */
+  /** One press: waiting frogs start, rested frogs go to the desk they were put at by hand, the rest fill free desks. */
   function allToWork() {
     let n = 0;
     for (const f of frogs) if (f.desk && f.status !== 'working' && f.status !== 'casino' && f.stamina >= 1) { f.status = 'working'; n++; }
-    const idle = frogs.filter((f) => !f.desk && f.status === 'idle' && f.stamina >= 1)
-      .sort((a, b) => b.rarity - a.rarity || b.stats.profit - a.stats.profit);
-    for (const path of PATHS) {
-      let d = freeDesk(path);
-      while (d !== null && idle.length) { const f = idle.shift(); f.desk = { path, desk: d }; f.status = 'working'; n++; d = freeDesk(path); }
+    const rested = frogs.filter((f) => !f.desk && f.status === 'idle' && f.stamina >= 1);
+    for (const f of rested) if (f.home && !holder(f.home.path, f.home.desk)) { f.desk = { ...f.home }; f.status = 'working'; n++; }
+    const left = rested.filter((f) => !f.desk);
+    for (const path of PATHS) for (let d = 0; d < DESKS && left.length; d++) {
+      if (holder(path, d)) continue;
+      const f = left.shift(); f.desk = { path, desk: d }; f.status = 'working'; n++;
     }
     if (n) quiet(cmd('/api/frogs/work-all'));
     return n;
   }
+
+  /** Frogs that stopped working and are not rested go to rest. Working frogs keep working. */
   function allToCasino() {
     let n = 0;
-    for (const f of frogs) if (f.status !== 'casino' && (f.status === 'working' || f.stamina < f.max)) { f.status = 'casino'; f.desk = null; f.rate = 0; n++; }
+    for (const f of frogs) if (f.status !== 'casino' && f.status !== 'working' && f.stamina < f.max) { f.status = 'casino'; f.desk = null; f.rate = 0; n++; }
     if (n) quiet(cmd('/api/frogs/rest-all'));
     return n;
   }
+
   function startWork(f) {
     if (!f.desk || f.stamina < 1) return;
     f.status = 'working';
     quiet(cmd('/api/frogs/work', { frogId: f.id }));
   }
   function rest(f) { f.status = 'casino'; f.desk = null; f.rate = 0; quiet(cmd('/api/frogs/rest', { frogId: f.id })); }
-  function stop(f) { f.desk = null; if (f.status !== 'casino') f.status = 'idle'; quiet(cmd('/api/frogs/stop', { frogId: f.id })); }
+  function stop(f) { f.desk = null; f.home = null; if (f.status !== 'casino') f.status = 'idle'; quiet(cmd('/api/frogs/stop', { frogId: f.id })); }
   function goWork(f, path) {
     if (!path) path = PATHS.find((p) => freeDesk(p) !== null);
     if (!path) return 'ALL 15 DESKS ARE TAKEN';

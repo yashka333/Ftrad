@@ -35,6 +35,8 @@ export interface Frog {
   statusSince: number;
   /** Desk the frog owns. It keeps the desk while it rests. */
   desk: DeskSlot | null;
+  /** Desk the player put this frog at by hand. ALL TO WORK sends it back there first. */
+  home?: DeskSlot | null;
   earned: number;
   bornAt: number;
 }
